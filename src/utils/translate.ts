@@ -24,12 +24,9 @@
  * @returns {void}
  */
 function convertBinary(input: string, setOutput: React.Dispatch<string[]>) {
-    if (input !== input) {
-        return;
-    }
     const binaryOutput: string[] = [];
     for (let i = 0; i < input.length; i++) {
-        const binaryString = "0" + input[i].charCodeAt(0).toString(2);
+        const binaryString = input.charCodeAt(i).toString(2).padStart(8, "0");
         binaryOutput.push(binaryString);
     }
     setOutput(binaryOutput);
@@ -99,20 +96,6 @@ const clearContx = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
     contx?.clearRect(0, 0, canv.width, canv.height);
 };
 
-function memoise<T extends (...args: any[]) => any>(fn: T) {
-    const cache: { [key: string]: any } = {};
-
-    return ((...args: Parameters<T>) => {
-        const key = JSON.stringify(args);
-        if (cache[key]) {
-            return cache[key];
-        }
-        const result = fn(...args);
-        cache[key] = result;
-        return result;
-    }) as T;
-}
-
 /**
  * Draws a binary image on a canvas.
  *
@@ -166,15 +149,7 @@ function plot(
 
     clearContx(canvasRef);
 
-    const memoisedDoLoop = memoise(doLoop);
-
     let iter = 0;
-    let sizeMultiplier = 87;
-    let sizeModifier = 0;
-    let columnWidth = 779;
-    let seedOffset = 30;
-    let lineHeight = 98;
-    let columnDivider = 4;
 
     /**
      * Draw the translated binary image on the canvas.
@@ -251,37 +226,9 @@ function plot(
         (output.length > 64 && encryptionEnabled) ||
         (output.length > 128 && !encryptionEnabled)
     ) {
-        sizeModifier = 20;
-        sizeMultiplier = 45;
-        columnWidth = 405;
-        seedOffset = 10;
-        lineHeight = 60;
-        columnDivider = 8;
-        memoisedDoLoop(
-            contx,
-            sizeModifier,
-            sizeMultiplier,
-            columnWidth,
-            seedOffset,
-            lineHeight,
-            columnDivider,
-        );
+        doLoop(contx, 20, 45, 405, 10, 60, 8);
     } else {
-        sizeModifier = 10;
-        sizeMultiplier = 90;
-        columnWidth = 800;
-        seedOffset = 10;
-        lineHeight = 90;
-        columnDivider = 4;
-        memoisedDoLoop(
-            contx,
-            sizeModifier,
-            sizeMultiplier,
-            columnWidth,
-            seedOffset,
-            lineHeight,
-            columnDivider,
-        );
+        doLoop(contx, 10, 90, 800, 10, 90, 4);
     }
 }
 

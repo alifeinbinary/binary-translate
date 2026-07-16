@@ -119,8 +119,10 @@ const Encrypt: React.FC = () => {
                             message is stored to the image's metadata, which
                             <i>is</i> temporarily hosted on our servers. This novel
                             app is meant for educational and entertainment purposes.
-                            That being said, it uses 128-bit AES encryption, so it's
-                            about as secure as you can get.
+                            That being said, it uses AES-256 encryption. Note that
+                            crypto-js derives the key from your passphrase with an
+                            older MD5-based (OpenSSL) key-derivation function, so
+                            choose a long, unique password.
                         </Trans>
                     </p>
                 </Modal.Body>

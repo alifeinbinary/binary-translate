@@ -31,6 +31,8 @@ jobs:
             VITE_MANAGE_API_URL: ${{ secrets.VITE_MANAGE_API_URL }}
             VITE_READ_API_URL: ${{ secrets.VITE_READ_API_URL }}
             VITE_TOKEN: ${{ secrets.VITE_TOKEN }}
+            VITE_CLOUDFRONT_FILES_URL: "https://dj8rv0ejdatzv.cloudfront.net/files/"
+            VITE_WEBINY_FOLDER_ID: "66dab7609c00420008532f90#0001"
         runs-on: ubuntu-latest
         steps:
             - name: Checkout

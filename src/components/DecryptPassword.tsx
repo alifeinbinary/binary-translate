@@ -17,17 +17,12 @@
 
 import { useRef } from 'react'
 import { clearContx } from '../utils/translate';
-// import { PasswordProps } from '../types';
 import { useTranslation } from "react-i18next";
 
 interface DecryptPasswordProps {
     decryptPassword: string;
     setDecryptPassword: (value: string) => void;
     setDecryptedText: (value: string) => void;
-    // decryptedText: string;
-    // setStringToDecrypt: (value: string) => void;
-    // stringToDecrypt: string;
-    // setEncryptedText: (value: string) => void;
     encryptionEnabled: boolean;
     setEncryptionEnabled: (value: boolean) => void;
 }
@@ -52,68 +47,16 @@ export const DecryptPassword: React.FC<DecryptPasswordProps> = ({ decryptPasswor
 
     const { t } = useTranslation();
 
-    // const toastId = useRef("save");
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-    // const handleCheckboxChange = () => {
-    //     setEncryptionEnabled(!encryptionEnabled)
-    //     toast.update(toastId.current, {
-    //         render: "Encryption " + (!encryptionEnabled ? "enabled." : "disabled. Message will be embedded as plain text."),
-    //         type: "info",
-    //         isLoading: false,
-    //         autoClose: 1000,
-    //     })
-    //     if (encryptionEnabled) {
-    //         setPassword('');
-    //     } else {
-    //         setDecryptedText('');
-    //         setOutput([]);
-    //     }
-    //     if (decryptedText && stringToDecrypt) {
-    //         setEncryptedText('');
-    //         setStringToDecrypt('');
-    //     }
-    //     if (stringToDecrypt && password === '') {
-    //         setEncryptedText('');
-    //         setStringToDecrypt('');
-    //         clearContx(canvasRef);
-    //         setOutput([]);
-    //     }
-    // }
 
     return (
         <div>
             <div className="text-center text-black w-full font-bold text-xl">Crack it open!</div>
             <label className='relative inline-flex cursor-pointer select-none items-center'>
-                {/* <input
-                type='checkbox'
-                name='encryption'
-                checked={encryptionEnabled ? encryptionEnabled : false}
-                onChange={handleCheckboxChange}
-                className='sr-only'
-                data-tooltip-target="tooltip-encryption"
-                data-testid="toggle-encryption"
-                aria-checked={encryptionEnabled}
-            /> */}
                 <div tabIndex={0} className='shadow-card p-1 flex h-[46px] items-center justify-center rounded-md text-gray-900 bg-gray-200 dark:bg-seablue'>
-                    {/* <Tooltip content={t('password.tooltip.content')} trigger="hover" placement="top" theme={lockTooltip}>
-                    <span
-                        className={`flex h-9 w-9 items-center transition ease-in-out duration-300 justify-center rounded-l-md ${!encryptionEnabled ? 'text-sm text-gray-500 bg-gray-200' : 'bg-sagegreen/[0.8] hover:bg-sagegreen/[1.0] text-white'
-                            }`}
-                    >
-                        <FontAwesomeIcon icon={faLock} className="w-4 h-4" aria-hidden="true" />
-                    </span>
-                    <span
-                        className={`flex h-9 w-9 items-center transition ease-in-out duration-300 justify-center rounded-r-md ${encryptionEnabled ? 'text-sm text-gray-500 bg-gray-200' : 'bg-lightbergundy hover:bg-bergundy text-white'
-                            }`}
-                    >
-                        <FontAwesomeIcon icon={faUnlock} className="w-4 h-4" aria-hidden="true" />
-                    </span>
-                </Tooltip> */}
                     <input onChange={(e) => {
                         setDecryptPassword(e.target.value);
                         if (e.target.value.trim() === '') {
-                            // setEncryptedText('');
                             setDecryptedText('')
                             clearContx(canvasRef);
                         }

@@ -34,35 +34,39 @@ const handleEncrypt = (
 
 /**
  * Decrypts the given string with the given password and sets the decrypted text state.
- * If the decrypted string is empty, it sets the decrypted text state to the original string.
+ *
+ * crypto-js returns an empty string (rather than throwing) when the password is
+ * wrong, so an empty result is treated as a failure and surfaced through the
+ * optional `onError` callback. Callers can use the callback to show a toast.
+ *
  * @param {string} stringToDecrypt The string to decrypt.
  * @param {string} password The password to decrypt with.
- * @param {React.Dispatch<string>} setDecryptedText The function to set the decrypted text state.
+ * @param {(value: string) => void} setDecryptedText The function to set the decrypted text state.
+ * @param {(message: string) => void} [onError] Optional callback invoked when decryption fails.
+ * @returns {boolean} Whether decryption succeeded.
  */
 function handleDecrypt(
     stringToDecrypt: string,
     password: string,
-    setDecryptedText: React.Dispatch<string>,
-) {
-    let decryptionSuccessful = false;
-    let originalText = "";
+    setDecryptedText: (value: string) => void,
+    onError?: (message: string) => void,
+): boolean {
+    const failureMessage = "Incorrect password or the message could not be decrypted.";
 
     try {
         const bytes = AES.decrypt(stringToDecrypt, password);
-        originalText = bytes.toString(enc.Utf8);
+        const originalText = bytes.toString(enc.Utf8);
 
-        if (originalText.length > 0) {
-            decryptionSuccessful = true;
+        if (originalText.length === 0) {
+            onError?.(failureMessage);
+            return false;
         }
-    } catch (error) {
-        console.debug(error);
-        throw new Error(`Incorrect password`);
-    }
 
-    // Only update the UI if decryption was successful
-    if (decryptionSuccessful) {
-        // Update UI logic here
         setDecryptedText(originalText);
+        return true;
+    } catch {
+        onError?.(failureMessage);
+        return false;
     }
 }
 

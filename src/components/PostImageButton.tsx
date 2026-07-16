@@ -59,22 +59,10 @@ const PostImageButton: React.FC = () => {
     const { createBinaryFeedImage } = useCreateBinaryFeedImage();
     const { createBinaryImagePost, publishBinaryImagePost } = useCreateBinaryImagePost();
 
+    // Button is hidden/disabled unless there is input and, when encryption is
+    // enabled, a password.
     const handlePostVisibility = () => {
-        if (encryptionEnabled) {
-            if (!input || !password) {
-                return true;
-            } else {
-                return false;
-            }
-        } else if (!encryptionEnabled) {
-            if (!input) {
-                return true;
-            } else {
-                return true;
-            }
-        } else {
-            return false;
-        }
+        return !input || (encryptionEnabled && !password);
     };
 
     const handlePost = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -98,7 +86,6 @@ const PostImageButton: React.FC = () => {
                 // CREATE PNG WITH METADATA
                 const { payloadImage, filename, outputWidth, outputHeight } = await createPngWithMetadata(canvasRef.current, "968x544", action, encryptionEnabled, encryptedText, input, toastId);
 
-                console.debug("fileName", filename, "url", payloadImage);
                 toast.update(toastId, {
                     render: t("postimagebutton.toast.size"),
                     type: "info",
@@ -110,7 +97,6 @@ const PostImageButton: React.FC = () => {
                 // GET BLOB FROM PNG AND FILE SIZE
                 // const { blob, size } = await fetchBlobAndGetSize(payloadImage);
 
-                console.debug("blob", payloadImage, "size", payloadImage.size);
                 toast.update(toastId, {
                     render: t("postimagebutton.toast.presignedpayload"),
                     type: "info",
@@ -126,7 +112,6 @@ const PostImageButton: React.FC = () => {
                     size: payloadImage.size,
                 })
 
-                console.debug("data", data);
                 toast.update(toastId, {
                     render: t("postimagebutton.toast.uploading"),
                     type: "info",
@@ -137,7 +122,6 @@ const PostImageButton: React.FC = () => {
 
                 const preSignedPostPayload = data?.fileManager.getPreSignedPostPayload.data;
 
-                console.debug("preSignedPostPayload", preSignedPostPayload);
 
                 // UPLOAD FILE TO STORAGE
                 await uploadFileToS3(
@@ -150,11 +134,10 @@ const PostImageButton: React.FC = () => {
                     ...preSignedPostPayload.file,
                     tags: ["binary-image"],
                     aliases: [],
-                    location: { folderId: "66dab7609c00420008532f90#0001" },
+                    location: { folderId: import.meta.env.VITE_WEBINY_FOLDER_ID },
                 };
                 delete fileInput.__typename;
 
-                console.debug("fileInput", fileInput);
                 toast.update(toastId, {
                     render: t("postimagebutton.toast.createimage"),
                     type: "info",
@@ -163,9 +146,8 @@ const PostImageButton: React.FC = () => {
                     progress: 0.57
                 })
 
-                const createdFile = await createBinaryFeedImage(fileInput);
+                await createBinaryFeedImage(fileInput);
 
-                console.debug("createdFile", createdFile);
                 toast.update(toastId, {
                     render: t("postimagebutton.toast.createimagepost"),
                     type: "info",
@@ -176,10 +158,9 @@ const PostImageButton: React.FC = () => {
 
                 // CREATE BINARY IMAGE POST ENTRY WITH IMAGE, AUTHOR, AND DATE
                 const authorOrAnon = author ? author : "Anon";
-                const imageUrl = "https://dj8rv0ejdatzv.cloudfront.net/files/" + preSignedPostPayload.file.key;
+                const imageUrl = import.meta.env.VITE_CLOUDFRONT_FILES_URL + preSignedPostPayload.file.key;
                 const postId = await createBinaryImagePost(authorOrAnon, imageUrl, outputWidth, outputHeight);
 
-                console.debug("Binary image post created.");
                 toast.update(toastId, {
                     type: "info",
                     render: t("postimagebutton.toast.publishing"),
@@ -191,7 +172,6 @@ const PostImageButton: React.FC = () => {
                 // PUBLISH IMAGE POST
                 await publishBinaryImagePost(postId);
 
-                console.debug("Image published successfully!");
                 toast.update(toastId, {
                     type: "success",
                     render: t("postimagebutton.toast.success"),
@@ -202,7 +182,6 @@ const PostImageButton: React.FC = () => {
 
             } else {
                 // IF ENCRYPTION IS DISABLED
-                console.debug("Encryption disabled");
                 toast.update(toastId, {
                     type: "warning",
                     render: t("postimagebutton.toast.noencryption"),
@@ -214,7 +193,6 @@ const PostImageButton: React.FC = () => {
             setOutput([]);
         } else {
             // IF NO CANVAS IMAGE OR INPUT TEXT EXISTS
-            console.debug("No canvasRef or input");
             toast.update(toastId, {
                 type: "warning",
                 render: t("postimagebutton.toast.nocanvasorinput"),

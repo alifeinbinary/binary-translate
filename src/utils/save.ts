@@ -186,18 +186,11 @@ async function scaleCanvas(
  * @param {string} fileName The filename to save the blob as.
  */
 function saveToDisk(blob: Blob, fileName: string) {
-    const fileAndFunction = "save.saveToDisk: ";
-    const blobUrl = URL.createObjectURL(blob);
-
-    console.debug(fileAndFunction + "blobUrl: ", blobUrl);
-    if (fileName) {
-        fetch(blobUrl)
-            .then((response) => response.blob())
-            .then((blob) => saveAs(blob, fileName));
-        // URL.revokeObjectURL(blobUrl); // Clean up the object URL
-    } else {
-        console.error(fileAndFunction + "Failed to get filename");
+    if (!fileName) {
+        console.error("save.saveToDisk: Failed to get filename");
+        return;
     }
+    saveAs(blob, fileName);
 }
 
 /**
@@ -244,30 +237,39 @@ async function addMetadataToPng(
 }
 
 /**
- * Given an encrypted text, returns a filename for the PNG file.
+ * Produces a short, stable hexadecimal hash of the given string.
  *
- * The filename is of the form: "alifeinbinary_com-<first 8 characters of the encrypted text>.png"
+ * The same input always yields the same 8-character suffix, which keeps
+ * filenames stable across saves of an identical message.
  *
- * @param encryptionEnabled Whether the text is encrypted.
- * @param encryptedText The encrypted text.
- * @throws Error If no encrypted text is provided.
+ * @param value The string to hash.
+ * @returns An 8-character hexadecimal hash.
+ */
+function hashString(value: string): string {
+    let hash = 5381;
+    for (let i = 0; i < value.length; i++) {
+        hash = (hash * 33) ^ value.charCodeAt(i);
+    }
+    return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+/**
+ * Returns a filename for the PNG file.
+ *
+ * The filename is of the form: "alifeinbinary_com-<suffix>.png", where the
+ * suffix is a stable hash of the message. When no message is provided a random
+ * suffix is used instead so the flow is never interrupted.
+ *
+ * @param message The message being embedded (encrypted or plain text).
  * @returns A filename for the PNG file.
  */
-function getFilename(
-    encryptionEnabled: boolean,
-    encryptedText: string,
-): Promise<string> {
-    if (encryptedText) {
-        console.debug(
-            "save.createPngWithMetadata: Encrypted Text",
-            encryptedText,
-        );
-        const filename = `alifeinbinary_com-${encryptionEnabled ? encryptedText.slice(7, 15) : Math.floor(Math.random() * 10000)}.png`;
+function getFilename(message: string): Promise<string> {
+    const suffix = message
+        ? hashString(message)
+        : Math.random().toString(36).slice(2, 10);
+    const filename = `alifeinbinary_com-${suffix}.png`;
 
-        return Promise.resolve(filename); // Return filename;
-    } else {
-        throw new Error("No encrypted text provided");
-    }
+    return Promise.resolve(filename);
 }
 
 /**
@@ -370,7 +372,7 @@ async function createPngWithMetadata(
             throw handleBlobError("Payload is not a Blob");
 
         handleBlobInfo("Creating filename", 0.2);
-        const filename = await getFilename(encryptionEnabled, message);
+        const filename = await getFilename(message);
         if (!filename) throw handleBlobError("No filename");
 
         return {

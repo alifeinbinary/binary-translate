@@ -29,6 +29,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Clipboard } from "flowbite-react/components/Clipboard";
 import { PostProps } from "../types";
 import { AnimatePresence, motion } from 'framer-motion';
+import { toast } from "react-toastify";
 
 /**
  * A single post in the feed, displaying the image and allowing the user to input a password to decrypt the image.
@@ -133,13 +134,24 @@ const Post: React.FC<PostProps> = ({ id, entryId, author, posted, image, width, 
         }
     }, [dimensions, imageRef]);
 
+    const convertUrlToUint8Array = async (url: string) => {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        const imageArray = new Uint8Array(arrayBuffer);
+        return imageArray;
+    };
+
     useEffect(() => {
         const convertImage = async () => {
             const imageArray = await convertUrlToUint8Array(postState?.image as string);
             const stringToDecrypt = getMetadata(imageArray, "Message");
             if (postState?.password && stringToDecrypt) {
-                handleDecrypt(stringToDecrypt, postState.password, (decrypted) =>
-                    setPostState(id, { decryptedText: decrypted })
+                handleDecrypt(
+                    stringToDecrypt,
+                    postState.password,
+                    (decrypted) => setPostState(id, { decryptedText: decrypted }),
+                    (message) => toast.error(message)
                 );
             }
         };
@@ -166,14 +178,6 @@ const Post: React.FC<PostProps> = ({ id, entryId, author, posted, image, width, 
     const handleLinkClick = (event: React.MouseEvent<HTMLInputElement>) => {
         event.preventDefault();
         navigate(`/${entryId}`);
-    };
-
-    const convertUrlToUint8Array = async (url: string) => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-        const imageArray = new Uint8Array(arrayBuffer);
-        return imageArray;
     };
 
     const LinkIcon = () => (

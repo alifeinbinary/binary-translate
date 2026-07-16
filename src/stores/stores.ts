@@ -16,20 +16,13 @@
  */
 
 import { Canvas as Fabric } from "fabric";
-import { Dispatch, MutableRefObject } from "react";
+import { MutableRefObject } from "react";
 import { create } from "zustand";
-interface Message {
-    method?: string;
-    data?: unknown[];
-}
 
 // Define the store
 interface AppState {
     debugMode: boolean;
     setDebugMode: (value: boolean) => void;
-
-    logs: Message[];
-    setLogs: (value: Message[]) => void;
 }
 
 interface PostState {
@@ -62,7 +55,7 @@ interface ImageState {
     setInput: (value: string) => void;
 
     output: string[];
-    setOutput: Dispatch<string[]>;
+    setOutput: (value: string[]) => void;
 
     canvasHeight: number;
     setCanvasHeight: (value: number) => void;
@@ -89,15 +82,12 @@ interface ImageState {
     setStringToDecrypt: (value: string) => void;
 
     decryptedText: string;
-    setDecryptedText: Dispatch<string>;
+    setDecryptedText: (value: string) => void;
 }
 
 export const useAppState = create<AppState>((set) => ({
     debugMode: false,
     setDebugMode: (value: boolean) => set({ debugMode: value }),
-
-    logs: [],
-    setLogs: (value: Message[]) => set({ logs: value }),
 }));
 
 export const usePostState = create<PostStore>((set) => ({

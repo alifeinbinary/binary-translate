@@ -89,8 +89,7 @@ const Decrypt: React.FC<DropzoneProps> = ({ setInput, setEncryptionEnabled, setS
         acceptedFiles.forEach((file) => {
             const reader = new FileReader()
 
-            reader.onabort = () => console.log('file reading was aborted')
-            reader.onerror = () => console.log('file reading has failed')
+            reader.onerror = () => toast.error('There was a problem reading the file. Please try again.')
             reader.onloadend = () => {
                 // Get the binary string from the image file and make it a Uint8Array
                 const binaryStr = reader.result
@@ -99,11 +98,10 @@ const Decrypt: React.FC<DropzoneProps> = ({ setInput, setEncryptionEnabled, setS
                 // Pull metadata values from the png image
                 try {
                     const stringToDecrypt = getMetadata(imageArray as Uint8Array, 'Message')
-                    setEncryptionState(strToBool(getMetadata(imageArray as Uint8Array, 'Encrypted') as string))
-                    console.log(encryptionState)
-                    // const encryptionState = getMetadata(imageArray as Uint8Array, 'Encrypted')?.toLowerCase();
+                    const isEncrypted = strToBool(getMetadata(imageArray as Uint8Array, 'Encrypted') as string)
+                    setEncryptionState(isEncrypted)
 
-                    if (!encryptionState && !stringToDecrypt) {
+                    if (!isEncrypted && !stringToDecrypt) {
                         toast.error("Image not compatible with the translator or it has had it's metadata stripped in transit.",
                             {
                                 autoClose: 5000,
@@ -111,35 +109,22 @@ const Decrypt: React.FC<DropzoneProps> = ({ setInput, setEncryptionEnabled, setS
                             }
                         );
                         return
-                    } else if (!encryptionState && stringToDecrypt) {
+                    } else if (!isEncrypted && stringToDecrypt) {
                         setInput(stringToDecrypt as string)
-                        // toast.info('No encryption state found, however, a message is contained within the PNG file.');
-                    } else if (encryptionState && !stringToDecrypt) {
+                    } else if (isEncrypted && !stringToDecrypt) {
                         toast.error('An encryption state was found, however, there is no message found within the PNG file.');
-                    } else if (encryptionState && stringToDecrypt) {
-                        if (encryptionState) {
-                            setEncryptionEnabled(true)
-                            setStringToDecrypt(stringToDecrypt as string)
-                            console.log(stringToDecrypt)
-                            // toast.info("Please provide the secret key to decrypt the message", {
-                            //     autoClose: 4000,
-                            //     pauseOnHover: true
-                            // });
-                        } else {
-                            setEncryptionEnabled(false)
-                            setDecryptPassword('')
-                            setStringToDecrypt(stringToDecrypt as string)
-                        }
+                    } else if (isEncrypted && stringToDecrypt) {
+                        setEncryptionEnabled(true)
+                        setStringToDecrypt(stringToDecrypt as string)
                         return
                     } else {
                         return
                     }
-                } catch (error) {
+                } catch {
                     toast.error("Only PNG files generated with this translator are supported.", {
                         autoClose: 5000,
                         pauseOnHover: true
                     });
-                    console.log("Error: " + error);
                     return
                 }
             }
@@ -156,7 +141,7 @@ const Decrypt: React.FC<DropzoneProps> = ({ setInput, setEncryptionEnabled, setS
                         {
                             imageLoaded && encryptionState ? <DecryptPassword decryptPassword={decryptPassword} setDecryptPassword={setDecryptPassword} setDecryptedText={setDecryptedText} setEncryptionEnabled={setEncryptionEnabled} encryptionEnabled={true} /> :
                                 <>
-                                    <FontAwesomeIcon icon={faUpload as any} className="w-10 h-10 mb-3 text-gray-400" /><Trans i18nKey="decrypt.description" components={{ span: <span />, p: <p /> }}><p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop to extract message</p>
+                                    <FontAwesomeIcon icon={faUpload} className="w-10 h-10 mb-3 text-gray-400" /><Trans i18nKey="decrypt.description" components={{ span: <span />, p: <p /> }}><p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop to extract message</p>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">PNG format only</p></Trans>
                                 </>
                         }

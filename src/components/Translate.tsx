@@ -19,7 +19,7 @@ import { useEffect, useCallback, useRef, lazy, Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { convertBinary, plot } from '../utils/translate';
 import { handleEncrypt, handleDecrypt } from '../utils/encryption';
-import { Slide, ToastContainer } from "react-toastify"
+import { Slide, ToastContainer, toast } from "react-toastify"
 import { useImageState } from '../stores/stores';
 import { Spinner } from 'flowbite-react/components/Spinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -132,37 +132,40 @@ const Translate: React.FC = () => {
     }, [handleResize, output])
 
 
+    // Encoding: the user's typed `input` is the source of truth. Encrypt it when
+    // requested and render the appropriate value (cipher text or plain text) as
+    // binary. Decode-related state is cleared so the two flows never overlap.
     useEffect(() => {
-        if (input && encryptionEnabled && password) {
+        if (!input) return;
+
+        setStringToDecrypt('');
+        setDecryptedText('');
+
+        if (encryptionEnabled && password) {
             handleEncrypt(input, password, setEncryptedText);
         }
-        if (input.length > 0) {
-            setStringToDecrypt('')
-            setDecryptedText('')
-        }
-    }, [encryptionEnabled, input, password, setDecryptedText, setEncryptedText, setStringToDecrypt])
 
-    useEffect(() => {
-        if (encryptionEnabled && password) {
-            handleDecrypt(stringToDecrypt, password, setDecryptedText);
-        }
-        if (stringToDecrypt && !encryptionEnabled) {
-            setDecryptedText(stringToDecrypt)
-        }
-        if (stringToDecrypt.length > 0) {
-            convertBinary(stringToDecrypt, setOutput);
-        }
-    }, [encryptionEnabled, password, setDecryptedText, setOutput, stringToDecrypt])
+        convertBinary(encryptionEnabled ? encryptedText : input, setOutput);
+    }, [input, encryptionEnabled, password, encryptedText, setEncryptedText, setStringToDecrypt, setDecryptedText, setOutput]);
 
+    // Decoding: a dropped image populates `stringToDecrypt`. Render it as binary
+    // and, when encrypted, decrypt it into `decryptedText` (surfacing wrong
+    // passwords via a toast); otherwise the plain message is the decrypted text.
     useEffect(() => {
-        if (input.length !== 0 || encryptedText.length !== 0) {
-            if (encryptionEnabled) {
-                convertBinary(encryptedText, setOutput);
-            } else {
-                convertBinary(input, setOutput);
+        if (!stringToDecrypt) return;
+
+        convertBinary(stringToDecrypt, setOutput);
+
+        if (encryptionEnabled) {
+            if (password) {
+                handleDecrypt(stringToDecrypt, password, setDecryptedText, (message) =>
+                    toast.error(message)
+                );
             }
+        } else {
+            setDecryptedText(stringToDecrypt);
         }
-    }, [input, encryptionEnabled, encryptedText, setOutput]);
+    }, [stringToDecrypt, encryptionEnabled, password, setDecryptedText, setOutput]);
 
     return (
         <section id="translate" className="px-6 sm:px-2 xs:px-1">
@@ -187,18 +190,6 @@ const Translate: React.FC = () => {
                             </Tabs.Item>
                         </Tabs>
                     </div>
-                    {/* <div className='grid grid-cols-4 sm:grid-cols-4 xs:grid-cols-1 gap-4 sm:gap-0 xs:gap-0'>
-                        <div className='col-span-3 md:col-span-3 sm:col-span-3 xs:col-span-1'>
-                            <Suspense fallback={<Spinner />}>
-                                <Encrypt />
-                            </Suspense>
-                        </div>
-                        <div className='col-span-1 md:col-span-1 sm:col-span-1 xs:col-span-1'>
-                            <Suspense fallback={<Spinner />}>
-                                <Decrypt setInput={setInput} setEncryptionEnabled={setEncryptionEnabled} setStringToDecrypt={setStringToDecrypt} password={password} setPassword={setPassword} setDecryptedText={setDecryptedText} />
-                            </Suspense>
-                        </div>
-                    </div> */}
                     <h4 className="transition duration-500 h4 sm:hidden xs:hidden text-2xl text-left font-bold dark:text-white"><FontAwesomeIcon icon={faCrow} inverse bounce={isBouncing} onMouseOver={() => setIsBouncing(true)} onMouseOut={() => setIsBouncing(false)} className='w-12 h-12' /></h4>
                     <canvas id="canvas" ref={canvasRef} height={canvasHeight} width={canvasWidth} className='w-full rounded-lg xs:mt-4 sm:mt-4 bg-slate-100 dark:bg-slate-700 min-h-4' />
                 </div>
