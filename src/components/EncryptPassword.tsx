@@ -90,16 +90,16 @@ const EncryptPassword: React.FC<PasswordProps> = ({ password, setPassword, setEn
             <div tabIndex={0} className='shadow-card p-1 flex h-[46px] items-center justify-center rounded-md text-gray-900 bg-gray-200 dark:bg-seablue'>
                 <Tooltip content={t('password.tooltip.content')} trigger="hover" placement="top" theme={lockTooltip}>
                     <span
-                        className={`flex h-9 w-9 items-center transition ease-in-out duration-300 justify-center rounded-l-md ${!encryptionEnabled ? 'text-sm text-gray-500 bg-gray-200' : 'bg-sagegreen/[0.8] hover:bg-sagegreen/[1.0] text-white'
+                        className={`flex h-9 w-9 items-center transition ease-in-out duration-300 justify-center rounded-l-md ${!encryptionEnabled ? 'text-sm text-gray-500 bg-gray-200 dark:bg-gray-600' : 'bg-sagegreen hover:bg-sagegreen/[0.9] text-white shadow-inner'
                             }`}
                     >
-                        <FontAwesomeIcon icon={faLock} className="w-4 h-4" aria-hidden="true" />
+                        <FontAwesomeIcon icon={faLock} className={`w-4 h-4 transition-transform duration-200 ${encryptionEnabled ? 'scale-110' : ''}`} aria-hidden="true" />
                     </span>
                     <span
-                        className={`flex h-9 w-9 items-center transition ease-in-out duration-300 justify-center rounded-r-md ${encryptionEnabled ? 'text-sm text-gray-500 bg-gray-200' : 'bg-lightbergundy hover:bg-bergundy text-white'
+                        className={`flex h-9 w-9 items-center transition ease-in-out duration-300 justify-center rounded-r-md ${encryptionEnabled ? 'text-sm text-gray-500 bg-gray-200 dark:bg-gray-600' : 'bg-lightbergundy hover:bg-bergundy text-white shadow-inner'
                             }`}
                     >
-                        <FontAwesomeIcon icon={faUnlock} className="w-4 h-4" aria-hidden="true" />
+                        <FontAwesomeIcon icon={faUnlock} className={`w-4 h-4 transition-transform duration-200 ${!encryptionEnabled ? 'scale-110' : ''}`} aria-hidden="true" />
                     </span>
                 </Tooltip>
                 <input onChange={(e) => {
