@@ -133,6 +133,14 @@ const Post: React.FC<PostProps> = ({ id, entryId, author, posted, image, width, 
         }
     }, [dimensions, imageRef]);
 
+    const convertUrlToUint8Array = async (url: string) => {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        const imageArray = new Uint8Array(arrayBuffer);
+        return imageArray;
+    };
+
     useEffect(() => {
         const convertImage = async () => {
             const imageArray = await convertUrlToUint8Array(postState?.image as string);
@@ -152,9 +160,9 @@ const Post: React.FC<PostProps> = ({ id, entryId, author, posted, image, width, 
             const url = postState?.image;
             const filename = url.split("/").pop();
             if (filename) {
-                fetch(url)
-                    .then(response => response.blob())
-                    .then(blob => saveAs(blob, filename));
+                const response = await fetch(url);
+                const blob = await response.blob();
+                saveAs(blob, filename);
             } else {
                 console.log("Failed to get filename");
             }
@@ -166,14 +174,6 @@ const Post: React.FC<PostProps> = ({ id, entryId, author, posted, image, width, 
     const handleLinkClick = (event: React.MouseEvent<HTMLInputElement>) => {
         event.preventDefault();
         navigate(`/${entryId}`);
-    };
-
-    const convertUrlToUint8Array = async (url: string) => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-        const imageArray = new Uint8Array(arrayBuffer);
-        return imageArray;
     };
 
     const LinkIcon = () => (
@@ -253,17 +253,15 @@ const Post: React.FC<PostProps> = ({ id, entryId, author, posted, image, width, 
                         </AnimatePresence>
                     </motion.div>
                 </div>
-                <div className="flex justify-between">
-                    <div className="max-w-56 bg-gray-50 dark:bg-slate-900 px-3 py-2 rounded-b-lg xs:rounded-b-lg xs:rounded-bl-lg">
+                <div className="flex justify-between gap-2">
+                    <div className="flex-shrink-0 bg-gray-50 dark:bg-slate-900 px-3 py-2 rounded-bl-lg">
                         <div className="flex items-center">
-                            <div className="flex-1 flex items-center p-3 xs:px-1 xs:py-2 dark:text-white text-lg text-gray-400 hover:text-red-600 dark:hover:text-red-600 transition duration-350 ease-in-out">
-                                <button aria-label="Download image" title="Download image" className="inline-flex h-9 w-9 items-center transition ease-in-out duration-300 cursor-pointer px-3 py-2.5 text-sm font-medium text-center rounded-lg bg-gray-200 hover:ring-transparent text-gray-900 hover:bg-lightgreen hover:text-white focus:ring-blue-200 focus:ring-4" onClick={handleImageDownload}>
-                                    <FontAwesomeIcon icon={faDownload} />
-                                </button>
-                            </div>
+                            <button aria-label="Download image" title="Download image" className="inline-flex h-10 w-10 items-center justify-center transition ease-in-out duration-300 cursor-pointer text-sm font-medium text-center rounded-lg bg-gray-200 dark:bg-slate-700 hover:ring-transparent text-gray-700 dark:text-gray-300 hover:bg-sagegreen hover:text-white dark:hover:bg-sagegreen focus:ring-blue-200 focus:ring-4 active:scale-95" onClick={handleImageDownload}>
+                                <FontAwesomeIcon icon={faDownload} className="w-4 h-4" />
+                            </button>
                         </div>
                     </div>
-                    <div className="w-full flex items-center justify-center width-auto max-w-72 bg-gray-50 dark:bg-slate-900 px-3 py-2 rounded-b-lg xs:rounded-b-lg xs:rounded-br-lg">
+                    <div className="flex-1 flex items-center justify-end max-w-72 bg-gray-50 dark:bg-slate-900 px-3 py-2 rounded-br-lg">
                         <EncryptPassword
                             password={postState?.password || ""}
                             setPassword={(value) => setPostState(id, { password: value })}

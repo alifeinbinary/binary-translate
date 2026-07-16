@@ -24,7 +24,7 @@
  * @returns {void}
  */
 function convertBinary(input: string, setOutput: React.Dispatch<string[]>) {
-    if (input !== input) {
+    if (!input) {
         return;
     }
     const binaryOutput: string[] = [];
@@ -169,12 +169,12 @@ function plot(
     const memoisedDoLoop = memoise(doLoop);
 
     let iter = 0;
-    let sizeMultiplier = 87;
-    let sizeModifier = 0;
-    let columnWidth = 779;
-    let seedOffset = 30;
-    let lineHeight = 98;
-    let columnDivider = 4;
+    let sizeMultiplier: number;
+    let sizeModifier: number;
+    let columnWidth: number;
+    let seedOffset: number;
+    let lineHeight: number;
+    let columnDivider: number;
 
     /**
      * Draw the translated binary image on the canvas.
