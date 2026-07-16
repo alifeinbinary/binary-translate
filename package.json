@@ -89,5 +89,5 @@
         "not IE 11",
         "last 2 versions"
     ],
-    "packageManager": "pnpm@10.33.0"
+    "packageManager": "pnpm@11.13.1"
 }
