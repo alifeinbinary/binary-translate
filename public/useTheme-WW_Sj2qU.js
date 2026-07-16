@@ -1,0 +1,3 @@
+import{o as a}from"./chunk-Jp_zfdSZ.js";import{n as o}from"./jsx-runtime-MUAlOh_t.js";var t=a(o(),1),s=()=>{const[e,r]=(0,t.useState)(localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");return(0,t.useEffect)(()=>{document.documentElement.classList.toggle("dark",e==="dark")},[e]),{theme:e,toggleTheme:()=>{r(e==="dark"?"light":"dark"),localStorage.theme=e==="dark"?"light":"dark"}}};export{s as t};
+
+//# sourceMappingURL=useTheme-WW_Sj2qU.js.map
