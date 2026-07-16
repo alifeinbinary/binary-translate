@@ -133,8 +133,9 @@ const Translate: React.FC = () => {
 
 
     // Encoding: the user's typed `input` is the source of truth. Encrypt it when
-    // requested and render the appropriate value (cipher text or plain text) as
-    // binary. Decode-related state is cleared so the two flows never overlap.
+    // requested and clear any decode-related state so the two flows never
+    // overlap. `encryptedText` is intentionally NOT a dependency: AES.encrypt
+    // yields a fresh ciphertext each call, so depending on it would loop.
     useEffect(() => {
         if (!input) return;
 
@@ -144,9 +145,15 @@ const Translate: React.FC = () => {
         if (encryptionEnabled && password) {
             handleEncrypt(input, password, setEncryptedText);
         }
+    }, [input, encryptionEnabled, password, setEncryptedText, setStringToDecrypt, setDecryptedText]);
+
+    // Render the active encode value (cipher text when encrypted, otherwise the
+    // plain input) as binary whenever it changes.
+    useEffect(() => {
+        if (!input) return;
 
         convertBinary(encryptionEnabled ? encryptedText : input, setOutput);
-    }, [input, encryptionEnabled, password, encryptedText, setEncryptedText, setStringToDecrypt, setDecryptedText, setOutput]);
+    }, [input, encryptionEnabled, encryptedText, setOutput]);
 
     // Decoding: a dropped image populates `stringToDecrypt`. Render it as binary
     // and, when encrypted, decrypt it into `decryptedText` (surfacing wrong
